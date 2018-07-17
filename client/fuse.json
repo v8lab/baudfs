@@ -1,0 +1,12 @@
+{
+  "mountpoint": "/mnt",
+  "volname": "simserver",
+  "master": "localhost:8900",
+  "logpath": "/export/Logs/baudstorage",
+  "profport": "10084"
+}
+
+
+
+
+
