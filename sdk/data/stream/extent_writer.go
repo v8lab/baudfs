@@ -21,8 +21,8 @@ const (
 	DefaultWriteBufferSize = 2 * util.MB
 	ForBidUpdateExtentKey  = -1
 	ForBidUpdateMetaNode   = -2
-	ExtentFlushIng =1
-	ExtentHasFlushed=2
+	ExtentFlushIng         = 1
+	ExtentHasFlushed       = 2
 )
 
 var (
@@ -44,10 +44,11 @@ type ExtentWriter struct {
 	recoverCnt    int       //if failed,then recover contine,this is recover count
 
 	sync.Mutex
-	flushLock    sync.Mutex
-	forbidUpdate int64
-	requestLock  sync.RWMutex
-	isflushIng  int32
+	flushLock     sync.Mutex
+	forbidUpdate  int64
+	requestLock   sync.RWMutex
+	isflushIng    int32
+	flushSignleCh chan bool
 }
 
 func NewExtentWriter(inode uint64, dp *data.DataPartition, w *data.Wrapper, extentId uint64) (writer *ExtentWriter, err error) {
@@ -61,6 +62,7 @@ func NewExtentWriter(inode uint64, dp *data.DataPartition, w *data.Wrapper, exte
 	writer.dp = dp
 	writer.inode = inode
 	writer.w = w
+	writer.flushSignleCh = make(chan bool, 1)
 	var connect *net.TCPConn
 	conn, err := net.DialTimeout("tcp", dp.Hosts[0], time.Second)
 	if err == nil {
@@ -79,14 +81,24 @@ func NewExtentWriter(inode uint64, dp *data.DataPartition, w *data.Wrapper, exte
 
 //when backEndlush func called,and sdk must wait
 func (writer *ExtentWriter) flushWait() {
-	start := time.Now().UnixNano()
-	atomic.StoreInt32(&writer.isflushIng,ExtentFlushIng)
+	writer.flushSignleCh = make(chan bool, 1)
+	ticker := time.NewTicker(time.Second)
+	atomic.StoreInt32(&writer.isflushIng, ExtentFlushIng)
+	defer func() {
+		atomic.StoreInt32(&writer.isflushIng, ExtentHasFlushed)
+		ticker.Stop()
+		close(writer.flushSignleCh)
+	}()
+	if !(writer.getQueueListLen() > 0 || writer.currentPacket != nil) || atomic.LoadInt32(&writer.isflushIng) == ExtentHasFlushed {
+		return
+	}
 	for {
-		if atomic.LoadInt32(&writer.isflushIng)==ExtentHasFlushed ||
-			time.Now().UnixNano()-start > int64(time.Millisecond*1000) {
+		select {
+		case <-writer.flushSignleCh:
+			return
+		case <-ticker.C:
 			return
 		}
-		time.Sleep(time.Microsecond)
 	}
 }
 
@@ -284,8 +296,14 @@ func (writer *ExtentWriter) processReply(e *list.Element, request, reply *Packet
 	}
 	writer.removeRquest(e)
 	writer.addByteAck(uint64(request.Size))
-	if atomic.LoadInt32(&writer.isflushIng)==ExtentFlushIng && !(writer.getQueueListLen()> 0 || writer.currentPacket != nil){
-		atomic.StoreInt32(&writer.isflushIng,ExtentHasFlushed)
+	if atomic.LoadInt32(&writer.isflushIng) == ExtentFlushIng && !(writer.getQueueListLen() > 0 || writer.currentPacket != nil) {
+		atomic.StoreInt32(&writer.isflushIng, ExtentHasFlushed)
+		select {
+		case writer.flushSignleCh <- true:
+			break
+		default:
+			break
+		}
 	}
 	log.LogDebugf("recive inode[%v] kerneloffset[%v] to extent[%v] pkg[%v] recive[%v]",
 		writer.inode, request.kernelOffset, writer.toString(), request.GetUniqueLogId(), reply.GetUniqueLogId())

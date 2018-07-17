@@ -298,7 +298,9 @@ func (s *DataNode) serveConn(conn net.Conn) {
 	)
 
 	defer func() {
-		if err != nil && err != io.EOF && !strings.Contains(err.Error(), "closed connection") {
+		if err != nil && err != io.EOF &&
+			!strings.Contains(err.Error(), "closed connection") &&
+				!strings.Contains(err.Error(), "reset by peer") {
 			log.LogErrorf("action[serveConn] err[%v].", err)
 		}
 		space.Stats().RemoveConnection()
