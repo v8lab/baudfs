@@ -112,7 +112,7 @@ func (helper *masterHelper) httpRequest(method, url string, param map[string]str
 	client.Timeout = time.Second * 3
 	var req *http.Request
 	fullUrl := helper.mergeRequestUrl(url, param)
-	log.LogDebugf("action[httpRequest] method[%v] url[%v] data[%v].", method, fullUrl, string(reqData))
+	log.LogDebugf("action[httpRequest] method[%v] url[%v] reqBodyLen[%v].", method, fullUrl, len(reqData))
 	if req, err = http.NewRequest(method, fullUrl, reader); err != nil {
 		return
 	}

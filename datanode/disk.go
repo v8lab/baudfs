@@ -185,11 +185,9 @@ func (d *Disk) updateSpaceInfo() (err error) {
 	} else {
 		d.Status = proto.ReadWrite
 	}
-	msg := fmt.Sprintf("action[updateSpaceInfo] disk[%v] total[%v] realAvail[%v] partitionsAvail[%v]"+
-		"minRestSize[%v] maxErrs[%v] readErrs[%v] writeErrs[%v] partitionStatus[%v]", d.Path,
+	log.LogDebugf("action[updateSpaceInfo] disk[%v] total[%v] available[%v] remain[%v] "+
+		"restSize[%v] maxErrs[%v] readErrs[%v] writeErrs[%v] status[%v]", d.Path,
 		d.All, d.Available, d.RemainWeightsForCreatePartition, d.RestSize, d.MaxErrs, d.ReadErrs, d.WriteErrs, d.Status)
-	log.LogDebugf(msg)
-
 	return
 }
 
@@ -263,7 +261,7 @@ func (d *Disk) RestorePartition(space SpaceManager) {
 				filename, d.Path, err.Error())
 			continue
 		}
-		log.LogDebugf("acton[RestorePartition] disk info path[%v] name[%v] partitionId[%v] partitionSize[%v].",
+		log.LogDebugf("acton[RestorePartition] disk[%v] path[%v] partitionId[%v] partitionSize[%v].",
 			d.Path, fileInfo.Name(), partitionId, partitionSize)
 		wg.Add(1)
 		go func(partitionId uint32,filename string) {
