@@ -1,7 +1,7 @@
 # Master
 
-   The cluster metadata contains dataNodes,metaNodes,vols,dataPartitions and metaPartitons,they are managed by master server. The master server caches the metadata in mem,persist to rocksDB,and ensure consistence by raft protocol.
-  The master server manages dataPartitoin id to dataNode server mapping,metaPartition id to      metaNode server mapping.
+   The cluster metadata contains dataNodes,metaNodes,vols,dataPartitions and metaPartitions,they are managed by master server. The master server caches the metadata in mem,persist to rocksDB,and ensure consistence by raft protocol.
+  The master server manages dataPartition id to dataNode server mapping,metaPartition id to metaNode server mapping.
 
 ## Features
 
@@ -25,7 +25,7 @@ $ dep ensure
 ```shell
 $ sh build.sh
 ```
-## Configration
+## Configuration
 
  BaudFS using **JSON** as for configuration file format. Generally,the master cluster contains three nodes.
 
@@ -87,9 +87,9 @@ $ nohup ./master -c config.json > nohup.out &
 
 ### Parameter specification
   - **name**: the name of vol
-  - **id**: the id of dataPartitoin
+  - **id**: the id of dataPartition
   - **addr**: the addr of dataNode, format is ip:port
-  - **count**： the total num of dataPartitons in the vol
+  - **count**： the total num of dataPartitions in the vol
   - **type**: store engine type
 
 ### Create
@@ -100,7 +100,7 @@ $ nohup ./master -c config.json > nohup.out &
 - http://127.0.0.1/dataPartition/load?name=baudfs&id=1
 ### Offline one replica
 - http://127.0.0.1/dataPartition/offline?name=baudfs&id=13&addr=ip:port
-### Get all dataParitions of a vol
+### Get all dataPartitions of a vol
 - http://127.0.0.1/client/dataPartitions?name=baudfs
 
 ## MetaNode API
