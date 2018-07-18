@@ -10,6 +10,7 @@ import (
 	"path"
 	"strconv"
 	"time"
+	"os"
 )
 
 type RaftStore interface {
@@ -53,15 +54,31 @@ func (s *raftStore) Stop() {
 	}
 }
 
-func NewRaftStore(cfg *Config) (mr RaftStore, err error) {
-	resolver := NewNodeResolver()
+func newRaftLogger(dir string) {
 
-	raftLog, err := raftlog.NewLog(cfg.WalPath, "raft", "debug")
+	raftLogPath := path.Join(dir, "logs")
+	_, err := os.Stat(raftLogPath)
+	if err != nil {
+		if pathErr, ok := err.(*os.PathError); ok {
+			if os.IsNotExist(pathErr) {
+				os.MkdirAll(raftLogPath, 0755)
+			}
+		}
+	}
+
+	raftLog, err := raftlog.NewLog(raftLogPath, "raft", "debug")
 	if err != nil {
 		fmt.Println("Fatal: failed to start the baud storage daemon - ", err)
 		return
 	}
 	logger.SetLogger(raftLog)
+	return
+}
+
+func NewRaftStore(cfg *Config) (mr RaftStore, err error) {
+	resolver := NewNodeResolver()
+
+	newRaftLogger(cfg.WalPath)
 
 	rc := raft.DefaultConfig()
 	rc.NodeID = cfg.NodeID

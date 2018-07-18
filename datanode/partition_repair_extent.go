@@ -17,12 +17,12 @@ func (dp *dataPartition) doStreamExtentFixRepair(wg *sync.WaitGroup, remoteExten
 	defer wg.Done()
 	err := dp.streamRepairExtent(remoteExtentInfo)
 	if err != nil {
-		localExtentInfo, err1 := dp.GetExtentStore().GetWatermark(uint64(remoteExtentInfo.FileId))
-		if err != nil {
-			err = errors.Annotatef(err1, "not exsit")
+		localExtentInfo, opErr := dp.GetExtentStore().GetWatermark(uint64(remoteExtentInfo.FileId))
+		if opErr != nil {
+			err = errors.Annotatef(err, opErr.Error())
 		}
-		err = errors.Annotatef(err, "partition[%v] extent[%v] streamRepairExtentFailed "+
-			"leaderExtentInfo[%v] localExtentInfo[%v]", remoteExtentInfo.ToString(), localExtentInfo.ToString())
+		err = errors.Annotatef(err, "partition[%v] remote[%v] local[%v]",
+			dp.partitionId, remoteExtentInfo, localExtentInfo)
 		log.LogErrorf("action[doStreamExtentFixRepair] err[%v].", err)
 	}
 }

@@ -21,6 +21,7 @@ func main() {
 	var (
 		confFile   = flag.String("c", "", "config file path")
 		fileOffset uint64
+		dataSize   uint64
 		dataString string
 	)
 
@@ -49,9 +50,10 @@ func main() {
 			return
 		}
 
+		dataSize = 0
 		dataTemp := data[fileOffset:]
 		recordType := dataTemp[0]
-		dataSize := binary.BigEndian.Uint64(dataTemp[1:9])
+		dataSize = binary.BigEndian.Uint64(dataTemp[1:9])
 		opType := dataTemp[9]
 		term := binary.BigEndian.Uint64(dataTemp[10:18])
 		index := binary.BigEndian.Uint64(dataTemp[18:26])

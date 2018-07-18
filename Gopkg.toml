@@ -26,20 +26,12 @@
 
 
 [[constraint]]
-  branch = "master"
-  name = "github.com/tiglabs/baudstorage/fuse"
-
-[[constraint]]
   name = "github.com/golang/protobuf"
   version = "1.0.0"
 
 [[constraint]]
   branch = "master"
   name = "github.com/juju/errors"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/tecbot/gorocksdb"
 
 [[constraint]]
   branch = "master"

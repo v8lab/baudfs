@@ -24,12 +24,12 @@ func (dp *dataPartition) doStreamTinyFixRepair(wg *sync.WaitGroup, remoteTinyFil
 	defer wg.Done()
 	err := dp.streamRepairTinyObjects(remoteTinyFileInfo)
 	if err != nil {
-		localTinyInfo, err1 := dp.GetTinyStore().GetWatermark(uint64(remoteTinyFileInfo.FileId))
-		if err != nil {
-			err = errors.Annotatef(err1, "not exsit")
+		localTinyInfo, opErr := dp.GetTinyStore().GetWatermark(uint64(remoteTinyFileInfo.FileId))
+		if opErr != nil {
+			err = errors.Annotatef(err, opErr.Error())
 		}
-		err = errors.Annotatef(err, "dataPartition[%v] extent[%v] streamRepairTinyFailed "+
-			"leaderTinyInfo[%v] localTinyInfo[%v]", remoteTinyFileInfo.ToString(), localTinyInfo.ToString())
+		err = errors.Annotatef(err, "dataPartition[%v] remote[%v] local[%v]",
+			dp.partitionId, remoteTinyFileInfo, localTinyInfo)
 		log.LogError(errors.ErrorStack(err))
 	}
 }

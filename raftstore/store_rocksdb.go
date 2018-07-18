@@ -2,7 +2,7 @@ package raftstore
 
 import (
 	"fmt"
-	"github.com/tecbot/gorocksdb"
+	"github.com/tiglabs/baudstorage/util/gorocksdb"
 )
 
 //#cgo CFLAGS:-I/usr/local/include

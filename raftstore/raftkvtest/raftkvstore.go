@@ -5,7 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/juju/errors"
-	"github.com/tecbot/gorocksdb"
+	"github.com/tiglabs/baudstorage/util/gorocksdb"
 	. "github.com/tiglabs/baudstorage/raftstore"
 	"github.com/tiglabs/baudstorage/util/config"
 	"github.com/tiglabs/baudstorage/util/log"

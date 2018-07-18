@@ -11,7 +11,7 @@ DataNode is used to store and ensure the consistency of stored file data for eac
 
 BaudFS use [dep](https://github.com/golang/dep) for dependency management. 
 
-All necessary third part dependencies have been define in `Gopkg.toml` under the project root.
+All necessary third part dependencies have been defined in `Gopkg.toml` under the project root.
 
 To install dependencies make sure [dep](https://github.com/golang/dep) have been installed and execute `dep` with `ensure` command at the `$GOPATH/github.com/tiglibs/baudfs`.
 
@@ -76,7 +76,7 @@ BaudFS using **JSON** as for configuration file format.
 
 ## Storage engine
 
-A fusion storage engine designed for both tiny file and large file storage and manement.
+A fusion storage engine designed for both tiny file and large file storage and management.
 There are two store in each data partition, **chunk store** and **extent store**.
 
 **Chunk store**

@@ -222,7 +222,7 @@ func (dp *dataPartition) mapMaxSizeExtentToIndex(allMembers []*MembersFileMetas)
 /*generator add extent if follower not have this extent*/
 func (dp *dataPartition) generatorAddExtentsTasks(allMembers []*MembersFileMetas) {
 	leader := allMembers[0]
-	leaderAddr := LocalIP
+	leaderAddr := dp.replicaHosts[0]
 	for fileId, leaderFile := range leader.files {
 		if fileId <= storage.TinyChunkCount {
 			continue
@@ -268,7 +268,7 @@ func (dp *dataPartition) generatorFixFileSizeTasks(allMembers []*MembersFileMeta
 func (dp *dataPartition) generatorDeleteExtentsTasks(allMembers []*MembersFileMetas) {
 	store := dp.extentStore
 	deletes := store.GetDelObjects()
-	leaderAddr := LocalIP
+	leaderAddr := dp.replicaHosts[0]
 	for _, deleteFileId := range deletes {
 		for index := 1; index < len(allMembers); index++ {
 			follower := allMembers[index]

@@ -45,9 +45,9 @@ func (ei *FileInfo) FromExtent(extent Extent) {
 	}
 }
 
-func (ei *FileInfo) ToString() (m string) {
+func (ei *FileInfo) String() (m string) {
 	source := ei.Source
-	if ei.Source == "" {
+	if source == "" {
 		source = "none"
 	}
 	return fmt.Sprintf("%v_%v_%v_%v_%v_%v", ei.FileId, ei.Inode, ei.Size, ei.Crc, ei.Deleted, source)

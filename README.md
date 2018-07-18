@@ -1,49 +1,58 @@
-# BaudStorage
+# Baudfs
 
 ## Overview
 
-BaudStorage is a datacenter storage system for immutable objects and streaming files. And it provides several pragmatic abstractions: 
+Baudfs is a unified distributed filesystem for small files and large files. 
 
-* BLOBs like images and short videos
+* key-file data model, i.e., namespaceless
 
-* hierachical directories
+* hierachical namespace
 
-* file streams of append-only extents
+* unlimited scalability of both metadata and data
 
-You can create any number of object buckets and filesystem instances on BaudStorage.
+* strong consistency
+
+Baudfs has been built and deployed in production since 2013. 
 
 ## Architecture
 
-BS consists of several components:
+metadata partition: inode range
+
+data partition: two storage engines: tiny file chunks, extents; one replication protocol
+
+Baudfs consists of several components:
 
 * the cluster master. single raft replication
 
-* metanode. multi-raft replication, a metadata range (inode range) per raft; a namespace is partitioned to inode ranges 
+* metanode. multi-raft replication, a meta partition (inode range) per raft
 
-* datanode. de-clustering volumes of objects or extents; volume works as the replication unit and every volume is replicated via a consistent replication protocol. 
-
-Note that BS is a highly available storage system with strong consistency: the master, the metadata store, the object store, and the extent store are all consistently replicated. 
-
-The detailed architecture design is in docs/Design.md
+* datanode. de-clustering of data partitions, replicated via a consistent replication protocol
 
 
-## APIs
+## Interfaces
 
 - Go SDK
 - Java SDK
-- RESTful S3-compatible API 
 - FUSE
 - NFS
 
-## Use Cases and Ecosystem
 
-BaudEngine on BaudStorage
+## Usage
 
-HBase on BaudStorage
+* Image Store
 
-MyRocks on BaudStorage
+based on the namespace-less key-file interface, nginx integration
 
-minio integration
+* Object Store
 
-nginx integration for image service
+integration with minio
+
+* Big Data
+
+integration with Hadoop
+
+* Container Persistent Volumes
+
+integration with Kubernetes
+
 
