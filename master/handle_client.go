@@ -185,7 +185,6 @@ func volStat(vol *Vol) (stat *VolStatInfo) {
 		usedSize := dp.getMaxUsedSize()
 		stat.UsedSize = stat.UsedSize + usedSize
 	}
-	stat.TotalSize = uint64(float64(stat.TotalSize) * TotalSpaceScaleRate)
 	if stat.UsedSize > stat.TotalSize {
 		stat.UsedSize = stat.TotalSize
 	}

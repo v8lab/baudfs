@@ -9,15 +9,22 @@ import (
 )
 
 const (
-	BlockCrcHeaderSize  = PerBlockCrcSize*BlockCount+1
-	BlockCount          = 1024*2
-	MarkDelete          = 'D'
-	UnMarkDelete        = 'U'
-	MarkDeleteIndex     = BlockCrcHeaderSize-1
-	BlockSize           = 65536 * 2
-	PerBlockCrcSize     = 4
-	DeleteIndexFileName = "delete.index"
-	ChunkOpenOpt      = os.O_CREATE | os.O_RDWR | os.O_APPEND
+	BlockHeaderInoSize     = 8
+	BlockHeaderCrcSize     = PerBlockCrcSize * BlockCount
+	BlockHeaderCrcIndex    = BlockHeaderInoSize
+	BlockHeaderDelMarkSize = 1
+	BlockHeaderSize        = BlockHeaderInoSize + BlockHeaderCrcSize + BlockHeaderDelMarkSize
+	BlockCount             = 1024
+	MarkDelete             = 'D'
+	UnMarkDelete           = 'U'
+	MarkDeleteIndex        = BlockHeaderSize - 1
+	BlockSize              = 65536 * 4
+	ReadBlockSize          = 65536
+	PerBlockCrcSize        = 4
+	DeleteIndexFileName    = "delete.index"
+	ExtentSize             = BlockCount * BlockSize
+	ExtentFileSizeLimit = BlockHeaderSize+ExtentSize
+	PacketHeaderSize       = 45
 )
 
 var (
@@ -32,7 +39,7 @@ func main()  {
 		return
 	}
 	var offset int64
-	offset=BlockCrcHeaderSize
+	offset=BlockHeaderSize
 	if err!=nil {
 		fmt.Println(err)
 		return

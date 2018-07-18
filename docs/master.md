@@ -1,59 +1,85 @@
-概述：
+## 部署
+# 编译
+   - rocksdb版本要求：5.9.2
+   - 下载 gorocksdb
+      > git clone https://github.com/tecbot/gorocksdb.git
+      > git checkout -b baudfs 3e47615
+   - 假设rocksdb安装在默认目录，即可执行如下命令编译
+      >CGO_CFLAGS="-I/usr/local/include" CGO_LDFLAGS="-L/usr/local/lib -lrocksdb -lstdc++ -lm -lz   -lbz2 -lsnappy " go build
+# 编辑配置文件
+  > 配置文件支持json格式，请参考示例，示例中的配置项都必须配置。示例：
 
+  ```json
+   {
+  "role": "master",
+  "ip": "127.0.0.1",
+  "port": "8080",
+  "prof":"10088",
+  "id":"1",
+  "peers": "1:127.0.0.1:8080,1:127.0.0.1:8081,1:127.0.0.1:8082",
+  "logDir": "/export/master",
+  "logLevel":"DEBUG",
+  "retainLogs":"2000",
+  "walDir":"/export/raft",
+  "storeDir":"/export/rocks",
+  "clusterName":"baudStorage"
+}
+```
 
-一.master的概述：
+# 启动
+    >  nohup ./master -c config.json > nohup.out &
 
-1.master主要管理datanode,metanode,并提供volGroup的视图和metaGroup的视图,以及namespace信息
+### 管理API参考
 
-　　1.1 datanode的管理：初始化由管理员通过http接口，将其加入到集群。并不间断的发送命令给datanode，检测存活信息以及存储空间信息
+## 集群概况
 
-　　1.2 metanode的管理：初始化由管理员通过http接口，将其加入到集群。并不间断的发送命令给metanode，检测存活信息以及metaRange的信息
+    > http://127.0.0.1/admin/getCluster
 
-　　1.3 volGroup的视图，由sdk发起，获取当前整个所有的volGroup视图，包含volGroup的成员信息
+## vol API
 
-　　1.4 metaGroup的视图：由client发起，获取某个namespace下所有的metaGroup的信息，包含metaGroup的成员信息，
-以及metaGroup负责的inode范围，以及当前metaGroup的leader
+# 创建
+    > http://127.0.0.1/admin/createVol?name=fs&replicas=3&type=extent
+# 查看
+    > http://127.0.0.1/client/vol?name=fs
+# stat
+    > http://127.0.0.1/client/volStat?name=fs
 
-　
-2.接口信息描述:
+## MetaPartition API
 
-　　　/metanode/add? 注册一个metanode进程
+# 查看
+> http://127.0.0.1/client/metaPartition?name=fs&id=1
 
-　　　/datanode/add? 注册一个datanode进程
+# 下线某个副本
+> http://127.0.0.1/metaPartition/offline?name=fs&id=13&addr=ip:port
 
-　　　/client/volgroup?　获取一个vol的视图
+## dataPartition API
 
-　　　/client/metagroup?　获取某一个metaGroup的详细信息
+# 创建
+> http://127.0.0.1/dataPartition/create?count=40&name=fs&type=extent
+# 查看
+> http://127.0.0.1/dataPartition/get?id=100
+# 比对
+> http://127.0.0.1/dataPartition/load?name=fs&id=1
+# 下线某个副本
+> http://127.0.0.1/dataPartition/offline?name=fs&id=13&addr=ip:port
+# 查看某个Vol下所有的dataParitions
+> http://127.0.0.1/client/dataPartitions?name=fs
 
-　　　/client/namespace? 获取整个namespace下所有的metagroup视图信息
+## metaNode API
 
+    > http://127.0.0.1/metaNode/get?addr=ip:port
+    > http://127.0.0.1/metaNode/add?addr=ip:port
+    > http://127.0.0.1/metaNode/offline?addr=ip:port
 
-3.持久化,持久化通过raft+rocksdb实现。持久化包含:
+## dataNode API
 
-    3.1　metanode的持久化信息  
-        
-　  ３.2 datanode的持久化信息
+    > http://127.0.0.1/dataNode/get?addr=ip:port
+    > http://127.0.0.1/dataNode/add?addr=ip:port
+    > http://127.0.0.1/dataNode/offline?addr=ip:port
 
-　  ３.3 volGroup的持久化信息
+## Master管理 API
 
-    3.4 metagroup的持久化信息
-    
-4.主动发起的接口命令：，此接口由于耗时很长，所以master端发起命令后。
-
-　　由于metanode和datanode均采用tcp协议。。因此master需要发送相应的tcp命令，以完成相应的功能
-
-　　4.1.向metanode发送检测存活指令
-
-　　4.2.向metanode发送创建metaRange的信息
-
-　　4.3.向metanode发送loadMetaRange的指令
-
-　　4.4.向datanode发送检测存活的指令
-
-　　4.5.向datanode发送创建vol的指令
-
-　　4.6.向datanode发送loadVol的指令
-
-　
-　　
-　　
+# 添加节点
+> http://127.0.0.1/raftNode/add?addr=ip:port&id=3
+# 删除节点
+> http://127.0.0.1/raftNode/remove?addr=ip:port&id=3
